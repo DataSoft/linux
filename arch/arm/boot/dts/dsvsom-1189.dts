@@ -1,0 +1,192 @@
+/*
+ * Copyright 2015 DataSoft Corporation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ */
+
+/dts-v1/;
+#include "dsvsom-1190.dtsi"
+
+/ {
+	model = "DataSoft RAP";
+
+	chosen {
+		bootargs = "console=ttyLP2,115200";
+	};
+
+	aliases {
+		ethernet1 = &fec1;
+	};
+
+	rfmute {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_rfmute>;
+		red {
+			gpios = <&gpio2 19 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+		green {
+			gpios = <&gpio2 20 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+		blue {
+			gpios = <&gpio2 21 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+	};
+};
+
+&iomuxc {
+	dsvsom-1189 {
+
+		pinctrl_rfmute: rfmutegrp {
+			fsl,pins = <
+				VF610_PAD_PTA12__GPIO_5			0x03ad	/* GPIO_PB_RF_MUTEN */
+				VF610_PAD_PTC6__GPIO_51			0x0182	/* GPIO_RF_MUTE_STAT_RED_LEDN */
+				VF610_PAD_PTC7__GPIO_52			0x0182	/* GPIO_RF_MUTE_STAT_GRN_LEDN */
+				VF610_PAD_PTC8__GPIO_53			0x0182	/* GPIO_RF_MUTE_STAT_BLU_LEDN */
+			>;
+		};
+
+		pinctrl_fec1: fec1grp {
+			fsl,pins = <
+				VF610_PAD_PTA18__GPIO_8			0x0182	/* GPIO_ENET1_NRESET */
+				VF610_PAD_PTA19__GPIO_9			0x01ad	/* GPIO_ENET1_NIRQ_OUT */
+				VF610_PAD_PTA6__RMII_CLKIN		0x30df
+				VF610_PAD_PTC9__ENET_RMII1_MDC		0x30df
+				VF610_PAD_PTC10__ENET_RMII1_MDIO	0x30df
+				VF610_PAD_PTC11__ENET_RMII1_CRS		0x30df
+				VF610_PAD_PTC12__ENET_RMII1_RXD1	0x30df
+				VF610_PAD_PTC13__ENET_RMII1_RXD0	0x30df
+				VF610_PAD_PTC14__ENET_RMII1_RXER	0x30df
+				VF610_PAD_PTC15__ENET_RMII1_TXD1	0x30df
+				VF610_PAD_PTC16__ENET_RMII1_TXD0	0x30df
+				VF610_PAD_PTC17__ENET_RMII1_TXEN	0x30df
+			>;
+		};
+
+		pinctrl_cpld: cpldgrp {
+			fsl,pins = <
+				VF610_PAD_PTB14__GPIO_36		0x01ad	/* GPIO_MCU_CPLD_SP0 */
+				VF610_PAD_PTB15__GPIO_37		0x01ad	/* GPIO_MCU_CPLD_SP1 */
+				VF610_PAD_PTB16__GPIO_38		0x01ad	/* GPIO_MCU_CPLD_SP2 */
+				VF610_PAD_PTB17__GPIO_39		0x01ad	/* GPIO_MCU_CPLD_SP3 */
+				VF610_PAD_PTC29__GPIO_102		0x0182	/* GPIO_MCU_ZEROIZE */
+				VF610_PAD_PTC30__GPIO_103		0x0182	/* GPIO_RAP_ACTIVE */
+				VF610_PAD_PTC31__GPIO_104		0x0182	/* GPIO_MCU_CPLD_INITN */
+				VF610_PAD_PTA7__GPIO_134		0x01ad	/* GPIO_SRAM_STATUS */
+			>;
+		};
+
+		pinctrl_usb0: usb0grp {
+			fsl,pins = <
+				VF610_PAD_PTA16__GPIO_6			0x0182
+				VF610_PAD_PTA17__GPIO_7			0x0181
+				VF610_PAD_PTD4__GPIO_83			0x0182	/* GPIO_USB0_VBUS_DETCET */
+				VF610_PAD_PTB23__GPIO_93		0x01ad	/* GPIO_CONN_USB0_ID */
+			>;
+		};
+
+		pinctrl_usb1: usb1grp {
+			fsl,pins = <
+				VF610_PAD_PTB6__GPIO_28			0x0182	/* GPIO_USB1_VBUS_DETCET */
+				VF610_PAD_PTB7__GPIO_29			0x01ad	/* GPIO_CONN_USB1_ID */
+			>;
+		};
+
+		pinctrl_uart2: uart2grp {
+			fsl,pins = <
+				VF610_PAD_PTB2__GPIO_24			0x0182	/* GPIO_RX232_EN */
+				VF610_PAD_PTD0__UART2_TX		0x2182
+				VF610_PAD_PTD1__UART2_RX		0x21ad
+			>;
+		};
+
+		pinctrl_uart3: uart3grp {
+			fsl,pins = <
+				VF610_PAD_PTA20__UART3_TX		0x2182
+				VF610_PAD_PTA21__UART3_RX		0x21ad
+			>;
+		};
+
+		pinctrl_spi1: spi1grp {
+			fsl,pins = <
+				VF610_PAD_PTD5__DSPI1_CS0		0x2182
+				VF610_PAD_PTD6__DSPI1_SIN		0x21ad
+				VF610_PAD_PTD7__DSPI1_SOUT		0x2182
+				VF610_PAD_PTD8__DSPI1_SCK		0x2182
+			>;
+		};
+	};
+};
+
+&dspi1 {
+	bus-num = <1>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_spi1>;
+	status = "okay";
+
+	spidev0: spi@0 {
+		compatible = "spidev";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_cpld>;
+		spi-max-frequency = <1000000>;
+		reg = <0>;
+	};
+};
+
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart2>;
+	status = "okay";
+};
+
+&uart3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart3>;
+	status = "okay";
+};
+
+&usbdev0 {
+	disable-over-current;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usb0>;
+	status = "okay";
+};
+
+&usbh1 {
+	disable-over-current;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usb1>;
+	status = "okay";
+};
+
+&usbmisc0 {
+	status = "okay";
+};
+
+&usbmisc1 {
+	status = "okay";
+};
+
+&usbphy0 {
+	status = "okay";
+};
+
+&usbphy1 {
+	status = "okay";
+};
+
+&fec1 {
+	phy-mode = "rmii";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_fec1>;
+	phy-reset-duration = <10>;
+	phy-reset-gpios = <&gpio1 8 0>;
+	status = "okay";
+};
+

@@ -1,0 +1,210 @@
+/*
+ * Copyright 2014 DataSoft Corporation
+ * Based on vf610-twr.dts, Copyright 2013 Freescale Semiconductor, Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ */
+
+/dts-v1/;
+#include "vf610.dtsi"
+
+/ {
+	model = "DataSoft Sidebridge II.5";
+	compatible = "ds,dsvsom", "fsl,vf610-twr", "fsl,vf610";
+
+	chosen {
+		bootargs = "console=ttyLP2,115200";
+	};
+
+	memory {
+		reg = <0x80000000 0x10000000>;
+	};
+
+	wlan {
+		/* tiwi wl1271 wifi stuff */
+		enable-gpios = <&gpio1 23 GPIO_ACTIVE_HIGH>;
+		nirq-gpios = <&gpio1 26 GPIO_ACTIVE_HIGH>;
+	};
+
+	eeprom {
+		wp-gpios = <&gpio1 25 GPIO_ACTIVE_HIGH>;
+	};
+
+	kim {
+		compatible = "kim";
+		nshutdown_gpio = <22>;
+		dev_name = "/dev/ttyLP0";
+		flow_cntrl = <1>;
+		baud_rate = <3000000>;
+	};
+
+	btwilink {
+		compatible = "btwilink";
+	};
+};
+
+&snvs0 {
+	status = "disabled";
+};
+
+&L2 {
+	status = "disabled";
+};
+
+&edma0 {
+	status = "okay";
+};
+
+&iomuxc {
+	dsvsom-1138 {
+
+		pinctrl_gpio_bt_en: gpiobten {
+			fsl,pins = <
+				VF610_PAD_PTB0__GPIO_22			0x219e /* GPIO_TIWI_BT_EN_3V3 */
+			>;
+		};
+
+		pinctrl_gpio_wlan_en: gpiowlanen {
+			fsl,pins = <
+				VF610_PAD_PTB1__GPIO_23			0x219e /* GPIO_TIWI_WL_EN_3V3 */
+			>;
+		};
+
+		pinctrl_gpio_rx232: gpiorx232grp {
+			fsl,pins = <
+				VF610_PAD_PTB2__GPIO_24			0x219e /* GPIO_RX232_EN */
+			>;
+		};
+
+		pinctrl_gpio_eeprom: gpioeepromgrp {
+			fsl,pins = <
+				VF610_PAD_PTB3__GPIO_25			0x219e /* GPIO_EEP_WP */
+			>;
+		};
+
+		pinctrl_gpio_wlan_irq: gpiowlanirqgrp {
+			fsl,pins = <
+				VF610_PAD_PTB4__GPIO_26			0x219d /* GPIO_WLAN_NIRQ_3V3 */
+			>;
+		};
+
+		pinctrl_gpio_usb0_en: gpiousb0engrp {
+			fsl,pins = <
+				VF610_PAD_PTA7__GPIO_134		0x01be /* GPIO_USB0_EN */
+			>;
+		};
+
+		pinctrl_vbus_oc_otg: vbusocotggrp {
+			fsl,pins = <
+				VF610_PAD_PTA17__USB0_VBUS_OC		0x0201
+			>;
+		};
+
+		pinctrl_uart0: uart0grp {
+			fsl,pins = <
+				VF610_PAD_PTB10__UART0_TX		0x21a2
+				VF610_PAD_PTB11__UART0_RX		0x21a1
+				VF610_PAD_PTB12__UART0_RTS		0x21a2
+				VF610_PAD_PTB13__UART0_CTS		0x21a1
+			>;
+		};
+
+		pinctrl_uart2: uart2grp {
+			fsl,pins = <
+				VF610_PAD_PTD0__UART2_TX		0x21a2
+				VF610_PAD_PTD1__UART2_RX		0x21a1
+			>;
+		};
+
+		pinctrl_uart3: uart3grp {
+			fsl,pins = <
+				VF610_PAD_PTA20__UART3_TX		0x21a2
+				VF610_PAD_PTA21__UART3_RX		0x21a1
+			>;
+		};
+
+		pinctrl_esdhc0: esdhc0grp {
+			fsl,pins = <
+				VF610_PAD_PTC0__ESDHC0_CLK		0x00e3
+				VF610_PAD_PTC1__ESDHC0_CMD		0x00e3
+				VF610_PAD_PTC2__ESDHC0_DAT0		0x00e3
+				VF610_PAD_PTC3__ESDHC0_DAT1		0x00e3
+				VF610_PAD_PTC4__ESDHC0_DAT2		0x00e3
+				VF610_PAD_PTC5__ESDHC0_DAT3		0x00e3
+			>;
+		};
+
+		pinctrl_i2c0: i2c0grp {
+			fsl,pins = <
+				VF610_PAD_PTE19__I2C0_SCL		0x34d3
+				VF610_PAD_PTE20__I2C0_SDA		0x34d3
+			>;
+		};
+	};
+};
+
+&i2c0 {
+	clock-frequency = <100000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c0>;
+	status = "okay";
+};
+
+&uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart0>, <&pinctrl_gpio_bt_en>;
+	status = "okay";
+};
+
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart2>, <&pinctrl_gpio_rx232>;
+	enable-gpios = <&gpio1 24 GPIO_ACTIVE_HIGH>;
+	status = "okay";
+};
+
+&uart3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart3>;
+	status = "okay";
+};
+
+&usbdev0 {
+	disable-over-current;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_gpio_usb0_en>;
+	enable-gpios = <&gpio5 6 GPIO_ACTIVE_HIGH>;
+	status = "okay";
+};
+
+&usbh1 {
+	disable-over-current;
+	status = "okay";
+};
+
+&usbmisc0 {
+	status = "okay";
+};
+
+&usbmisc1 {
+	status = "okay";
+};
+
+&usbphy0 {
+	status = "okay";
+};
+
+&usbphy1 {
+	status = "okay";
+};
+
+&nfc {
+	nand-bus-width = <8>;
+	nand-ecc-mode = "hw";
+	nand-on-flash-bbt;
+	clock-frequency = <33000000>;
+	status = "okay";
+};
