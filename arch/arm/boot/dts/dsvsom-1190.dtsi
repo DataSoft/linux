@@ -156,10 +156,19 @@
 };
 
 &nfc {
-	nand-bus-width = <8>;
-	nand-ecc-mode = "hw";
-	nand-on-flash-bbt;
 	clock-frequency = <33000000>;
 	status = "okay";
+
+	nand@0 {
+		compatible = "fsl,vf610-nfc-nandcs";
+		reg = <0>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		nand-bus-width = <8>;
+		nand-ecc-mode = "hw";
+		nand-ecc-strength = <32>;
+		nand-ecc-step-size = <2048>;
+		nand-on-flash-bbt;
+	};
 };
 
