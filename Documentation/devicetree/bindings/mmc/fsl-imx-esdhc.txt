@@ -16,6 +16,7 @@ Required properties:
 	       "fsl,imx6sl-usdhc"
 	       "fsl,imx6sx-usdhc"
 	       "fsl,imx7d-usdhc"
+	       "fsl,vf610-esdhc"
 
 Optional properties:
 - fsl,wp-controller : Indicate to use controller internal write protection
@@ -33,6 +34,7 @@ Optional properties:
   This property allows user to change the tuning step to more than one delay
   cells which is useful for some special boards or cards when the default
   tuning step can't find the proper delay window within limited tuning retries.
+- en-gpios: GPIO that toggles based on the power state.
 
 Examples:
 

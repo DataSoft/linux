@@ -137,6 +137,15 @@
 /* The IP supports HS400 mode */
 #define ESDHC_FLAG_HS400		BIT(9)
 
+/*
+ * When an external enable GPIO is configured, use only a single write
+ * to the POWER register.
+ */
+#define ESDHC_FLAG_SINGLE_POWER_WRITE	BIT(10)
+
+/* The IP has no CLOCK register */
+#define ESDHC_FLAG_NO_CLOCK_REG		BIT(11)
+
 /* A higher clock ferquency than this rate requires strobell dll control */
 #define ESDHC_STROBE_DLL_CLK_FREQ	100000000
 
@@ -180,6 +189,13 @@ static struct esdhc_soc_data usdhc_imx7d_data = {
 			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
 			| ESDHC_FLAG_HS400,
 };
+
+static struct esdhc_soc_data sdhc_vf610_data = {
+	.flags = ESDHC_FLAG_ENGCM07207 |
+			ESDHC_FLAG_NO_CLOCK_REG |	/* Vybrid IP */
+			ESDHC_FLAG_SINGLE_POWER_WRITE,
+};
+
 
 struct pltfm_imx_data {
 	u32 scratchpad;
@@ -225,6 +241,7 @@ static const struct of_device_id imx_esdhc_dt_ids[] = {
 	{ .compatible = "fsl,imx6sl-usdhc", .data = &usdhc_imx6sl_data, },
 	{ .compatible = "fsl,imx6q-usdhc", .data = &usdhc_imx6q_data, },
 	{ .compatible = "fsl,imx7d-usdhc", .data = &usdhc_imx7d_data, },
+	{ .compatible = "fsl,vf610-sdhc", .data = &sdhc_vf610_data, },
 	{ /* sentinel */ }
 };
 MODULE_DEVICE_TABLE(of, imx_esdhc_dt_ids);
@@ -577,6 +594,7 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
 {
 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
 	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
 	u32 new_val;
 	u32 mask;
 
@@ -586,6 +604,17 @@ static void esdhc_writeb_le(struct sdhci_host *host, u8 val, int reg)
 		 * FSL put some DMA bits here
 		 * If your board has a regulator, code should be here
 		 */
+		if (val & SDHCI_POWER_ON) {
+			if (gpio_is_valid(boarddata->en_gpio)) {
+				dev_dbg(mmc_dev(host->mmc), "Setting power control ON\n");
+				gpio_set_value(boarddata->en_gpio, 1);
+			}
+		} else {
+			if (gpio_is_valid(boarddata->en_gpio)) {
+				dev_dbg(mmc_dev(host->mmc), "Setting power control OFF\n");
+				gpio_set_value(boarddata->en_gpio, 0);
+			}
+		}
 		return;
 	case SDHCI_HOST_CONTROL:
 		/* FSL messed up here, so we need to manually compose it. */
@@ -1035,6 +1064,8 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
 	if (mmc_gpio_get_cd(host->mmc) >= 0)
 		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
 
+	boarddata->en_gpio = of_get_named_gpio(np, "en-gpios", 0);
+
 	return 0;
 }
 #else
@@ -1175,6 +1206,9 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
 		host->quirks |= SDHCI_QUIRK_NO_MULTIBLOCK
 			| SDHCI_QUIRK_BROKEN_ADMA;
 
+	if (imx_data->socdata->flags & ESDHC_FLAG_NO_CLOCK_REG)
+		host->quirks |= SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
+
 	/*
 	 * The imx6q ROM code will change the default watermark level setting
 	 * to something insane.  Change it back here.
@@ -1232,6 +1266,18 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
 		err = sdhci_esdhc_imx_probe_nondt(pdev, host, imx_data);
 	if (err)
 		goto disable_clk;
+
+	if (gpio_is_valid(imx_data->boarddata.en_gpio)) {
+		err = gpio_request_one(imx_data->boarddata.en_gpio, GPIOF_OUT_INIT_LOW, "SDHC_EN");
+		if (err) {
+			dev_err(mmc_dev(host->mmc),
+				"Unable to request enable GPIO.\n");
+			goto disable_clk;
+		}
+
+		if (imx_data->socdata->flags & ESDHC_FLAG_SINGLE_POWER_WRITE)
+			host->quirks |= SDHCI_QUIRK_SINGLE_POWER_WRITE;
+	}
 
 	err = sdhci_add_host(host);
 	if (err)
