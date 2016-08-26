@@ -43,7 +43,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_esdhc1>;
 	bus-width = <4>;
-	cd-gpios = <&gpio3 21 GPIO_ACTIVE_LOW>;					/* GPIO for Card Detect */
+	cd-gpios = <&gpio2 21 GPIO_ACTIVE_LOW>;					/* GPIO for Card Detect */
 	status = "okay";
 };
 
@@ -197,7 +197,7 @@
 };
 
 &usbphy1 {
-	vbus-en-gpios = <&gpio5 6 GPIO_ACTIVE_HIGH>;				/* USB VBUS output enable for both USB0 and USB1 */
+	vbus-en-gpios = <&gpio4 6 GPIO_ACTIVE_HIGH>;				/* USB VBUS output enable for both USB0 and USB1 */
 	status = "okay";
 };
 

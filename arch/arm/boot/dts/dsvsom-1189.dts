@@ -26,15 +26,15 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_rfmute>;
 		red {
-			gpios = <&gpio2 19 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;
 			default-state = "on";
 		};
 		green {
-			gpios = <&gpio2 20 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio1 20 GPIO_ACTIVE_LOW>;
 			default-state = "on";
 		};
 		blue {
-			gpios = <&gpio2 21 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio1 21 GPIO_ACTIVE_LOW>;
 			default-state = "off";
 		};
 	};
@@ -186,7 +186,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_fec1>;
 	phy-reset-duration = <10>;
-	phy-reset-gpios = <&gpio1 8 0>;
+	phy-reset-gpios = <&gpio0 8 0>;
 	status = "okay";
 };
 

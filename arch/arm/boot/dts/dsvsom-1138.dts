@@ -25,12 +25,12 @@
 
 	wlan {
 		/* tiwi wl1271 wifi stuff */
-		enable-gpios = <&gpio1 23 GPIO_ACTIVE_HIGH>;
-		nirq-gpios = <&gpio1 26 GPIO_ACTIVE_HIGH>;
+		enable-gpios = <&gpio0 23 GPIO_ACTIVE_HIGH>;
+		nirq-gpios = <&gpio0 26 GPIO_ACTIVE_HIGH>;
 	};
 
 	eeprom {
-		wp-gpios = <&gpio1 25 GPIO_ACTIVE_HIGH>;
+		wp-gpios = <&gpio0 25 GPIO_ACTIVE_HIGH>;
 	};
 
 	kim {
@@ -162,7 +162,7 @@
 &uart2 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart2>, <&pinctrl_gpio_rx232>;
-	enable-gpios = <&gpio1 24 GPIO_ACTIVE_HIGH>;
+	enable-gpios = <&gpio0 24 GPIO_ACTIVE_HIGH>;
 	status = "okay";
 };
 
@@ -176,7 +176,7 @@
 	disable-over-current;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_gpio_usb0_en>;
-	enable-gpios = <&gpio5 6 GPIO_ACTIVE_HIGH>;
+	enable-gpios = <&gpio4 6 GPIO_ACTIVE_HIGH>;
 	status = "okay";
 };
 

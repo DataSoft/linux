@@ -53,15 +53,15 @@
 	rfmute {
 		compatible = "gpio-leds";
 		red {
-			gpios = <&gpio2 19 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;
 			default-state = "on";
 		};
 		green {
-			gpios = <&gpio2 20 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio1 20 GPIO_ACTIVE_LOW>;
 			default-state = "on";
 		};
 		blue {
-			gpios = <&gpio2 21 GPIO_ACTIVE_LOW>;
+			gpios = <&gpio1 21 GPIO_ACTIVE_LOW>;
 			default-state = "off";
 		};
 	};
@@ -85,7 +85,7 @@
 	bus-width = <4>;
 	non-removable;
 	no-1-8-v;
-	en-gpios = <&gpio1 23 GPIO_ACTIVE_HIGH>;		/* GPIO_TIWI_WL_EN_3V3 */
+	en-gpios = <&gpio0 23 GPIO_ACTIVE_HIGH>;		/* GPIO_TIWI_WL_EN_3V3 */
 	status = "okay";
 
 	#address-cells = <1>;
@@ -95,7 +95,7 @@
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_wlan>;
 		reg = <2>;
-		interrupt-parent = <&gpio1>;
+		interrupt-parent = <&gpio0>;
 		interrupts = <30 IRQ_TYPE_EDGE_RISING>;		/* GPIO_WLAN_NIRQ_3V3 */
 		clocks = <&refclock>;
 		clock-names = "refclock";
@@ -293,7 +293,7 @@
 		reg = <0x41>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&pinctrl_tsc>;
-		irq-gpio = <&gpio2 8 IRQ_TYPE_EDGE_FALLING>;
+		irq-gpio = <&gpio1 8 IRQ_TYPE_EDGE_FALLING>;
 		hold-irq-edge;
 
 		stmpe_touchscreen {
@@ -393,7 +393,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_fec1>;
 	phy-reset-duration = <10>;
-	phy-reset-gpios = <&gpio1 8 0>;
+	phy-reset-gpios = <&gpio0 8 0>;
 	status = "okay";
 };
 
