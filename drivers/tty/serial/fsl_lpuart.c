@@ -1150,6 +1150,8 @@ static int lpuart_startup(struct uart_port *port)
 	temp |= (UARTCR2_RIE | UARTCR2_TIE | UARTCR2_RE | UARTCR2_TE);
 	writeb(temp, sport->port.membase + UARTCR2);
 
+	spin_unlock_irqrestore(&sport->port.lock, flags);
+
 	if (sport->dma_rx_chan && !lpuart_start_rx_dma(sport)) {
 		/* set Rx DMA timeout */
 		sport->dma_rx_timeout = msecs_to_jiffies(DMA_RX_TIMEOUT);
@@ -1170,8 +1172,6 @@ static int lpuart_startup(struct uart_port *port)
 	} else {
 		sport->lpuart_dma_tx_use = false;
 	}
-
-	spin_unlock_irqrestore(&sport->port.lock, flags);
 
 	return 0;
 }
@@ -1398,6 +1398,8 @@ lpuart_set_termios(struct uart_port *port, struct ktermios *termios,
 	/* restore control register */
 	writeb(old_cr2, sport->port.membase + UARTCR2);
 
+	spin_unlock_irqrestore(&sport->port.lock, flags);
+
 	/*
 	 * If new baud rate is set, we will also need to update the Ring buffer
 	 * length according to the selected baud rate and restart Rx DMA path.
@@ -1415,8 +1417,6 @@ lpuart_set_termios(struct uart_port *port, struct ktermios *termios,
 			sport->lpuart_dma_rx_use = false;
 		}
 	}
-
-	spin_unlock_irqrestore(&sport->port.lock, flags);
 }
 
 static void
