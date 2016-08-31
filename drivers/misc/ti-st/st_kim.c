@@ -37,6 +37,8 @@
 #include <linux/ti_wilink_st.h>
 #include <linux/module.h>
 
+#include <linux/byteorder/generic.h>
+
 #define MAX_ST_DEVICES	3	/* Imagine 1 on each UART for now */
 static struct platform_device *st_kim_devices[MAX_ST_DEVICES];
 
@@ -420,6 +422,26 @@ static long download_firmware(struct kim_data_s *kim_gdata)
 	return 0;
 }
 
+// If device platform_data is null, then we need to fetch the data from the device tree.
+struct ti_st_plat_data* kim_platform_data_create( struct platform_device* pdev )
+{
+    struct ti_st_plat_data* pdata = kzalloc( sizeof(struct ti_st_plat_data), GFP_ATOMIC );
+    int length = UART_DEV_NAME_LEN;
+
+    if( pdata == NULL )
+    {
+        pr_err( "%s no memory for structure", __func__ );
+        return NULL;
+    }
+
+    pdata->nshutdown_gpio = be32_to_cpu( *( (int*)of_get_property( pdev->dev.of_node, "nshutdown_gpio", NULL ) ) );
+    strncpy( pdata->dev_name, (char*)of_get_property( pdev->dev.of_node, "dev_name", &length ), length );
+    pdata->flow_cntrl = be32_to_cpu( *( (int*)of_get_property( pdev->dev.of_node, "flow_cntrl", NULL ) ) );
+    pdata->baud_rate = be32_to_cpu( *( (int*)of_get_property( pdev->dev.of_node, "baud_rate", NULL ) ) );
+
+    return pdata;
+}
+
 /**********************************************************************/
 /* functions called from ST core */
 /* called from ST Core, when REG_IN_PROGRESS (registration in progress)
@@ -485,7 +507,7 @@ long st_kim_start(void *kim_data)
 		/* wait for ldisc to be installed */
 		err = wait_for_completion_interruptible_timeout(
 			&kim_gdata->ldisc_installed, msecs_to_jiffies(LDISC_TIME));
-		if (!err) {
+		if (!err) { 
 			/* ldisc installation timeout,
 			 * flush uart, power cycle BT_EN */
 			pr_err("ldisc installation timeout");
@@ -734,6 +756,12 @@ static int kim_probe(struct platform_device *pdev)
 		/* platform's sure about existence of 1 device */
 		st_kim_devices[0] = pdev;
 	}
+
+        if( pdata == NULL )
+        {
+            pdata = kim_platform_data_create( pdev );
+            pdev->dev.platform_data = pdata;
+        }
 
 	kim_gdata = kzalloc(sizeof(struct kim_data_s), GFP_ATOMIC);
 	if (!kim_gdata) {
