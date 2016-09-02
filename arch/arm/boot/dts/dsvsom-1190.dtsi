@@ -34,6 +34,16 @@
 		pinctrl-0 = <&pinctrl_bt>;
 		status = "okay";
 	};
+
+	reg_wlan: regulator-wlan {
+		compatible = "regulator-fixed";
+		regulator-name = "reg_wlan";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		startup-delay-us = <70000>;
+		gpio = <&gpio0 23 GPIO_ACTIVE_HIGH>;	/* GPIO_TIWI_WL_EN_3V3 */
+		enable-active-high;
+	};
 };
 
 &snvs0 {
@@ -49,13 +59,15 @@
 };
 
 &esdhc0 {
+	status = "okay";
+	vmmc-supply = <&reg_wlan>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_esdhc0>;
 	bus-width = <4>;
 	non-removable;
 	no-1-8-v;
-	en-gpios = <&gpio0 23 GPIO_ACTIVE_HIGH>;				/* GPIO_TIWI_WL_EN_3V3 */
-	status = "okay";
+	cap-power-off-card;
+	keep-power-in-suspend;
 
 	#address-cells = <1>;
 	#size-cells = <0>;
@@ -66,7 +78,7 @@
 		pinctrl-0 = <&pinctrl_wlan>;
 		reg = <2>;
 		interrupt-parent = <&gpio0>;
-		interrupts = <30 IRQ_TYPE_EDGE_RISING>;
+		interrupts = <30 IRQ_TYPE_LEVEL_HIGH>;
 		ref-clock-frequency = <38400000>;
 	};
 };
