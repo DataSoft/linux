@@ -1,0 +1,184 @@
+/*
+ * Copyright 2016 DataSoft Corporation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ */
+
+/dts-v1/;
+#include "dsvsom-1190-sbi.dtsi"
+
+/ {
+	model = "DataSoft Sidebridge Iridium";
+
+	chosen {
+		bootargs = "console=ttyLP2,115200";
+	};
+
+	aliases {
+		ethernet1 = &fec1;
+	};
+
+	rfmute {
+		compatible = "gpio-leds";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_rfmute>;
+		red {
+			gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+		green {
+			gpios = <&gpio1 20 GPIO_ACTIVE_LOW>;
+			default-state = "on";
+		};
+		blue {
+			gpios = <&gpio1 21 GPIO_ACTIVE_LOW>;
+			default-state = "off";
+		};
+	};
+};
+
+&iomuxc {
+	dsvsom-1279 {
+
+		pinctrl_rfmute: rfmutegrp {
+			fsl,pins = <
+				VF610_PAD_PTA12__GPIO_5			0x03ad 	/* GPIO_PB_RF_MUTEN */
+				VF610_PAD_PTC6__GPIO_51			0x0182 	/* GPIO_RF_MUTE_STAT_RED_LEDN */
+				VF610_PAD_PTC7__GPIO_52			0x0182 	/* GPIO_RF_MUTE_STAT_GRN_LEDN */
+				VF610_PAD_PTC8__GPIO_53			0x0182 	/* GPIO_RF_MUTE_STAT_BLU_LEDN */
+			>;
+		};
+
+		pinctrl_fec1: fec1grp {
+			fsl,pins = <
+				VF610_PAD_PTA18__GPIO_8			0x0182 	/* GPIO_ENET1_NRESET */
+				VF610_PAD_PTA19__GPIO_9			0x01ad 	/* GPIO_ENET1_NIRQ_OUT */
+				VF610_PAD_PTA6__RMII_CLKIN		0x30df
+				VF610_PAD_PTC9__ENET_RMII1_MDC		0x30df
+				VF610_PAD_PTC10__ENET_RMII1_MDIO	0x30df
+				VF610_PAD_PTC11__ENET_RMII1_CRS		0x30df
+				VF610_PAD_PTC12__ENET_RMII1_RXD1	0x30df
+				VF610_PAD_PTC13__ENET_RMII1_RXD0	0x30df
+				VF610_PAD_PTC14__ENET_RMII1_RXER	0x30df
+				VF610_PAD_PTC15__ENET_RMII1_TXD1	0x30df
+				VF610_PAD_PTC16__ENET_RMII1_TXD0	0x30df
+				VF610_PAD_PTC17__ENET_RMII1_TXEN	0x30df
+			>;
+		};
+
+		pinctrl_usb0: usb0grp {
+			fsl,pins = <
+				VF610_PAD_PTA16__USB0_VBUS_EN		0x0182
+				VF610_PAD_PTA17__USB0_VBUS_OC		0x0181
+				VF610_PAD_PTB23__GPIO_93		0x01ad 	/* GPIO_CONN_USB0_ID */
+			>;
+		};
+
+		pinctrl_uart1: uart1grp {
+			fsl,pins = <
+				VF610_PAD_PTB4__UART1_TX		0x2182
+				VF610_PAD_PTB5__UART1_RX		0x21ad
+			>;
+		};
+
+		pinctrl_uart2: uart2grp {
+			fsl,pins = <
+				VF610_PAD_PTB2__GPIO_24			0x0182 	/* GPIO_RX232_EN */
+				VF610_PAD_PTD0__UART2_TX		0x2182
+				VF610_PAD_PTD1__UART2_RX		0x21ad
+			>;
+		};
+
+		pinctrl_iridium: iridiumgrp {
+			fsl,pins = <
+				VF610_PAD_PTE3__GPIO_108		0x0182  /* GPIO_SBI_PWR_IND */
+				VF610_PAD_PTE4__GPIO_109		0x01ad  /* GPIO_PGOOD_RADIO_IN */
+				VF610_PAD_PTE6__GPIO_111		0x0182  /* GPIO_SBI_PWR_SRC */
+				VF610_PAD_PTE13__GPIO_118		0x0182  /* GPIO_SBI_WAKE */
+				VF610_PAD_PTE14__GPIO_119		0x0182  /* GPIO_SBI_SPARE0 */
+				VF610_PAD_PTE22__GPIO_127		0x0182  /* GPIO_SBI_SPARE1 */
+			>;
+		};
+	};
+};
+
+&uart1 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart1>;
+	status = "okay";
+};
+
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart2>;
+	status = "okay";
+};
+
+&usbdev0 {
+	disable-over-current;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_usb0>;
+	status = "okay";
+};
+
+&usbh1 {
+	disable-over-current;
+	status = "okay";
+};
+
+&usbmisc0 {
+	status = "okay";
+};
+
+&usbmisc1 {
+	status = "okay";
+};
+
+&usbphy0 {
+	status = "okay";
+};
+
+&usbphy1 {
+	status = "okay";
+};
+
+&fec1 {
+	phy-mode = "rmii";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_fec1>;
+	phy-reset-duration = <10>;
+	phy-reset-gpios = <&gpio0 8 0>;
+	status = "okay";
+};
+
+&gpio3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_iridium>;
+	sbi_pwr_ind {
+		gpio-hog;
+		gpios = <12 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "sbi-pwr-ind-out";
+	};
+	pgood_radio {
+		gpio-hog;
+		gpios = <13 GPIO_ACTIVE_HIGH>;
+		input;
+		line-name = "pgood-radio-in";
+	};
+	sbi_pwr_src {
+		gpio-hog;
+		gpios = <15 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "sbi-pwr-src-out";
+	};
+	sbi_wake {
+		gpio-hog;
+		gpios = <22 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "sbi-wake-out";
+	};
+};
