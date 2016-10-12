@@ -161,24 +161,6 @@
 		gpio-hog;
 		gpios = <12 GPIO_ACTIVE_HIGH>;
 		output-high;
-		line-name = "sbi-pwr-ind-out";
-	};
-	pgood_radio {
-		gpio-hog;
-		gpios = <13 GPIO_ACTIVE_HIGH>;
-		input;
-		line-name = "pgood-radio-in";
-	};
-	sbi_pwr_src {
-		gpio-hog;
-		gpios = <15 GPIO_ACTIVE_HIGH>;
-		output-high;
-		line-name = "sbi-pwr-src-out";
-	};
-	sbi_wake {
-		gpio-hog;
-		gpios = <22 GPIO_ACTIVE_HIGH>;
-		output-high;
-		line-name = "sbi-wake-out";
+		line-name = "sbi-pwr-ind";
 	};
 };
