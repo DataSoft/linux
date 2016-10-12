@@ -17,27 +17,6 @@
 		bootargs = "console=ttyLP2,115200";
 	};
 
-	aliases {
-		ethernet1 = &fec1;
-	};
-
-	rfmute {
-		compatible = "gpio-leds";
-		pinctrl-names = "default";
-		pinctrl-0 = <&pinctrl_rfmute>;
-		red {
-			gpios = <&gpio1 19 GPIO_ACTIVE_LOW>;
-			default-state = "on";
-		};
-		green {
-			gpios = <&gpio1 20 GPIO_ACTIVE_LOW>;
-			default-state = "on";
-		};
-		blue {
-			gpios = <&gpio1 21 GPIO_ACTIVE_LOW>;
-			default-state = "off";
-		};
-	};
 };
 
 &iomuxc {
@@ -49,23 +28,6 @@
 				VF610_PAD_PTC6__GPIO_51			0x0182 	/* GPIO_RF_MUTE_STAT_RED_LEDN */
 				VF610_PAD_PTC7__GPIO_52			0x0182 	/* GPIO_RF_MUTE_STAT_GRN_LEDN */
 				VF610_PAD_PTC8__GPIO_53			0x0182 	/* GPIO_RF_MUTE_STAT_BLU_LEDN */
-			>;
-		};
-
-		pinctrl_fec1: fec1grp {
-			fsl,pins = <
-				VF610_PAD_PTA18__GPIO_8			0x0182 	/* GPIO_ENET1_NRESET */
-				VF610_PAD_PTA19__GPIO_9			0x01ad 	/* GPIO_ENET1_NIRQ_OUT */
-				VF610_PAD_PTA6__RMII_CLKIN		0x30df
-				VF610_PAD_PTC9__ENET_RMII1_MDC		0x30df
-				VF610_PAD_PTC10__ENET_RMII1_MDIO	0x30df
-				VF610_PAD_PTC11__ENET_RMII1_CRS		0x30df
-				VF610_PAD_PTC12__ENET_RMII1_RXD1	0x30df
-				VF610_PAD_PTC13__ENET_RMII1_RXD0	0x30df
-				VF610_PAD_PTC14__ENET_RMII1_RXER	0x30df
-				VF610_PAD_PTC15__ENET_RMII1_TXD1	0x30df
-				VF610_PAD_PTC16__ENET_RMII1_TXD0	0x30df
-				VF610_PAD_PTC17__ENET_RMII1_TXEN	0x30df
 			>;
 		};
 
@@ -145,18 +107,10 @@
 	status = "okay";
 };
 
-&fec1 {
-	phy-mode = "rmii";
-	pinctrl-names = "default";
-	pinctrl-0 = <&pinctrl_fec1>;
-	phy-reset-duration = <10>;
-	phy-reset-gpios = <&gpio0 8 0>;
-	status = "okay";
-};
-
 &gpio3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_iridium>;
+
 	sbi_pwr_ind {
 		gpio-hog;
 		gpios = <12 GPIO_ACTIVE_HIGH>;
