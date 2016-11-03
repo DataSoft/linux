@@ -110,11 +110,7 @@
 &gpio3 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_iridium>;
-
-	sbi_pwr_ind {
-		gpio-hog;
-		gpios = <12 GPIO_ACTIVE_HIGH>;
-		output-high;
-		line-name = "sbi-pwr-ind";
-	};
+        gpio-line-names = "", "", "", "", "", "", "", "", "", "", "", "", "sbi-pwr-ind", "pgood-radio", "",
+                          "sbi-pwr-src", "", "", "", "", "", "", "sbi-wake", "sbi-spare0", "", "", "", "", "", "", "",
+                          "sbi-spare1";
 };
