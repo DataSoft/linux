@@ -9,13 +9,49 @@
  */
 
 /dts-v1/;
-#include "dsvsom-1190.dtsi"
+
+#include "vf610.dtsi"
 
 / {
+	compatible = "ds,dsvsom", "fsl,vf610-twr", "fsl,vf610";
+
 	model = "DataSoft Sidebridge II.5";
 
 	chosen {
 		bootargs = "console=ttyLP2,115200";
+	};
+
+	memory {
+		reg = <0x80000000 0x10000000>;
+	};
+
+	aliases {
+		mmc0 = &esdhc0;
+	};
+
+	kim {
+		compatible = "kim";
+		nshutdown_gpio = <22>;
+		dev_name = "/dev/ttyLP0";
+		flow_cntrl = <1>;
+		baud_rate = <3000000>;
+	};
+
+	btwilink {
+		compatible = "btwilink";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_bt>;
+		status = "okay";
+	};
+
+	reg_wlan: regulator-wlan {
+		compatible = "regulator-fixed";
+		regulator-name = "reg_wlan";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		startup-delay-us = <70000>;
+		gpio = <&gpio0 23 GPIO_ACTIVE_HIGH>;	/* GPIO_TIWI_WL_EN_3V3 */
+		enable-active-high;
 	};
 };
 
@@ -44,6 +80,89 @@
 			>;
 		};
 
+		pinctrl_bt: btgrp {
+			fsl,pins = <
+				VF610_PAD_PTB0__GPIO_22			0x0182 /* GPIO_TIWI_BT_EN_3V3 */
+				VF610_PAD_PTB9__GPIO_31			0x0182 /* GPIO_TIWI_AUD_DIR */
+			>;
+		};
+
+		pinctrl_wlan: wlangrp {
+			fsl,pins = <
+				VF610_PAD_PTB4__GPIO_26			0x01ad /* GPIO_WLAN_NIRQ_3V3 */
+			>;
+		};
+
+		pinctrl_eeprom: eepromgrp {
+			fsl,pins = <
+				VF610_PAD_PTB3__GPIO_25			0x0182 /* GPIO_EEP_WP */
+			>;
+		};
+
+		pinctrl_uart0: uart0grp {
+			fsl,pins = <
+				VF610_PAD_PTB10__UART0_TX		0x2182
+				VF610_PAD_PTB11__UART0_RX		0x21ad
+				VF610_PAD_PTB12__UART0_RTS		0x2182
+				VF610_PAD_PTB13__UART0_CTS		0x21ad
+			>;
+		};
+
+		pinctrl_esdhc0: esdhc0grp {
+			fsl,pins = <
+				VF610_PAD_PTC0__ESDHC0_CLK		0x31ef
+				VF610_PAD_PTC1__ESDHC0_CMD		0x31ef
+				VF610_PAD_PTC2__ESDHC0_DAT0		0x31ef
+				VF610_PAD_PTC3__ESDHC0_DAT1		0x31ef
+				VF610_PAD_PTC4__ESDHC0_DAT2		0x31ef
+				VF610_PAD_PTC5__ESDHC0_DAT3		0x31ef
+				VF610_PAD_PTB1__GPIO_23			0x0182 /* GPIO_TIWI_WL_EN_3V3 */
+			>;
+		};
+
+		pinctrl_i2c1: i2c1grp {
+			fsl,pins = <
+				VF610_PAD_PTE27__I2C1_SCL		0x05ef
+				VF610_PAD_PTE28__I2C1_SDA		0x05ef
+			>;
+		};
+	};
+};
+
+&snvs0 {
+	status = "disabled";
+};
+
+&L2 {
+	status = "disabled";
+};
+
+&edma0 {
+	status = "okay";
+};
+
+&esdhc0 {
+	status = "okay";
+	vmmc-supply = <&reg_wlan>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_esdhc0>;
+	bus-width = <4>;
+	non-removable;
+	no-1-8-v;
+	cap-power-off-card;
+	keep-power-in-suspend;
+
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	wlcore: wlcore@2 {
+		compatible = "ti,wl1271";
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_wlan>;
+		reg = <2>;
+		interrupt-parent = <&gpio0>;
+		interrupts = <26 IRQ_TYPE_LEVEL_HIGH>;
+		ref-clock-frequency = <38400000>;
 	};
 };
 
@@ -86,5 +205,48 @@
 
 &usbphy1 {
 	status = "okay";
+};
+
+&i2c1 {
+	clock-frequency = <100000>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_i2c1>;
+	status = "okay";
+
+	at24@50 {
+		compatible = "at24,24c256";
+		pagesize = <64>;
+		reg = <0x50>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_eeprom>;
+	};
+
+	rv4162@68 {
+		compatible = "microcrystal,rv4162";
+		reg = <0x68>;
+	};
+};
+
+&uart0 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_uart0>;
+	status = "okay";
+};
+
+&nfc {
+	clock-frequency = <33000000>;
+	status = "okay";
+
+	nand@0 {
+		compatible = "fsl,vf610-nfc-nandcs";
+		reg = <0>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+		nand-bus-width = <8>;
+		nand-ecc-mode = "hw";
+		nand-ecc-strength = <32>;
+		nand-ecc-step-size = <2048>;
+		nand-on-flash-bbt;
+	};
 };
 
